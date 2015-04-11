@@ -338,4 +338,19 @@ physx::PxActor* World::addTriangleMesh(const ofMesh &mesh, const ofVec3f &pos, c
     return updateMassAndInertia(rigid, density);
 }
 
+physx::PxActor* World::addConvexMesh(const vector<ofVec3f> &verts, const ofVec3f &pos, const ofQuaternion& rot, float density)
+{
+    physx::PxRigidActor *rigid = createRigid(pos, rot, density);
+    physx::PxConvexMesh *convexMesh = PxToolkit::createConvexMesh(*physics, *cooking, reinterpret_cast<const physx::PxVec3*>(verts.data()), verts.size(), physx::PxConvexFlag::eCOMPUTE_CONVEX | physx::PxConvexFlag::eINFLATE_CONVEX);
+    physx::PxConvexMeshGeometry geom = physx::PxConvexMeshGeometry(convexMesh, physx::PxMeshScale());
+    rigid->createShape(geom, *defaultMaterial);
+    return updateMassAndInertia(rigid, density);
+}
+
+physx::PxActor* World::addConvexMesh(const ofMesh &mesh, const ofVec3f &pos, const ofQuaternion& rot, float density)
+{
+    const vector<ofVec3f>& verts = mesh.getVertices();
+    return addConvexMesh(verts, pos, rot, density);
+}
+
 OFX_PHYSX_END_NAMESPACE

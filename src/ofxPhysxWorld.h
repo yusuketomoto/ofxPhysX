@@ -28,6 +28,9 @@ public:
 	
     physx::PxActor* addTriangleMesh(const ofMesh &mesh, const ofVec3f& pos, const ofQuaternion& rot = ofQuaternion(), float density = 1);
     
+    physx::PxActor* addConvexMesh(const vector<ofVec3f>& verts, const ofVec3f& pos, const ofQuaternion& rot = ofQuaternion(), float density = 1);
+    physx::PxActor* addConvexMesh(const ofMesh& mesh, const ofVec3f& pos, const ofQuaternion& rot = ofQuaternion(), float density = 1);
+    
 	void removeActor(physx::PxActor *actor);
 	
 	void setGravity(ofVec3f gravity);
