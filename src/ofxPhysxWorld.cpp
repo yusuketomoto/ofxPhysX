@@ -24,6 +24,14 @@ World::~World()
 	clear();
 }
 
+void World::removeActor(physx::PxActor *actor)
+{
+    if (!actor) return;
+    
+    scene->removeActor(*actor);
+    actor->release();
+}
+
 void World::clear()
 {
 	if (defaultMaterial)
