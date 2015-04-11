@@ -26,6 +26,8 @@ public:
 	physx::PxActor* addPlane(const ofVec3f& pos, const ofQuaternion& rot = ofQuaternion(), float density = 0);
 	physx::PxActor* addWorldBox(const ofVec3f &leftBottomFar, const ofVec3f& rightTopNear);
 	
+    physx::PxActor* addTriangleMesh(const ofMesh &mesh, const ofVec3f& pos, const ofQuaternion& rot = ofQuaternion(), float density = 1);
+    
 	void removeActor(physx::PxActor *actor);
 	
 	void setGravity(ofVec3f gravity);
@@ -46,6 +48,8 @@ protected:
 	
 	physx::PxScene *scene;
 	physx::PxMaterial *defaultMaterial;
+    
+    physx::PxCooking *cooking;
 	
 	physx::PxCudaContextManager* cudaContextManager;
 };

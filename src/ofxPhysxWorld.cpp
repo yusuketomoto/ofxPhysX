@@ -1,4 +1,5 @@
 #include "ofxPhysXWorld.h"
+#include "PxToolkit.h"
 
 OFX_PHYSX_BEGIN_NAMESPACE
 
@@ -61,6 +62,10 @@ void World::clear()
 	}
 	scene = NULL;
 	
+    if (cooking)
+        cooking->release();
+    cooking = NULL;
+    
 	if (cpuDispatcher)
 		cpuDispatcher->release();
 	cpuDispatcher = NULL;
@@ -105,6 +110,10 @@ bool World::setup(const ofVec3f& gravity)
 	physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, scale, trackOutstandingAllocations, profileZoneManager);
 	ASSERT(physics);
 	
+
+    cooking = PxCreateCooking(PX_PHYSICS_VERSION, *foundation, physx::PxCookingParams(scale));
+    ASSERT(cooking);
+
 	ASSERT(PxInitExtensions(*physics));
 	
 	// default material
@@ -304,6 +313,29 @@ physx::PxQuat(ofDegToRad(0), physx::PxVec3(0, 0, 1))));
 	rigid->createShape(p, *defaultMaterial, physx::PxTransform(physx::PxVec3(0, 0, rightTopNear.z), physx::PxQuat(ofDegToRad(90), physx::PxVec3(0, 1, 0))));
 
 	return updateMassAndInertia(rigid, 0);
+}
+
+physx::PxActor* World::addTriangleMesh(const ofMesh &mesh, const ofVec3f &pos, const ofQuaternion& rot, float density)
+{
+    physx::PxRigidActor *rigid = createRigid(pos, rot, density);
+    
+    physx::PxTriangleMeshDesc meshDesc;
+    meshDesc.points.count = mesh.getNumVertices();
+    meshDesc.points.stride = sizeof(ofVec3f);
+    meshDesc.points.data = mesh.getVertices().data();
+    
+    meshDesc.triangles.count = mesh.getNumIndices() / 3;
+    meshDesc.triangles.stride = sizeof(int) * 3;
+    meshDesc.triangles.data = mesh.getIndices().data();
+    
+    physx::PxDefaultMemoryOutputStream stream;
+    cooking->cookTriangleMesh(meshDesc, stream);
+    physx::PxDefaultMemoryInputData istream(stream.getData(), stream.getSize());
+    physx::PxTriangleMesh* triangleMesh = physics->createTriangleMesh(istream);
+    physx::PxTriangleMeshGeometry geom = physx::PxTriangleMeshGeometry(triangleMesh, physx::PxMeshScale());
+    
+    rigid->createShape(geom, *defaultMaterial);
+    return updateMassAndInertia(rigid, density);
 }
 
 OFX_PHYSX_END_NAMESPACE
